@@ -1,0 +1,40 @@
+commit faf472a2bb14dc8a49d13130038bf67c51b08948
+Author: nobu <nobu@b2dd03c8-39d4-4d8f-98ff-823fe69b080e>
+Date:   Sun Jan 8 01:59:54 2017 +0000
+
+    variable.c: resolve permanent name only
+    
+    * variable.c (rb_const_set): resolve and cache class name
+      immediately only if the outer class/module has the name,
+      otherwise just set the ID.  [ruby-core:79007] [Bug #13113]
+    
+    git-svn-id: svn+ssh://ci.ruby-lang.org/ruby/trunk@57284 b2dd03c8-39d4-4d8f-98ff-823fe69b080e
+
+diff --git a/variable.c b/variable.c
+index 70a28a670f..98b9073a02 100644
+--- a/variable.c
++++ b/variable.c
+@@ -2612,7 +2612,12 @@ rb_const_set(VALUE klass, ID id, VALUE val)
+      * and avoid order-dependency on const_tbl
+      */
+     if (rb_cObject && (RB_TYPE_P(val, T_MODULE) || RB_TYPE_P(val, T_CLASS))) {
+-	rb_class_name(val);
++	if (!NIL_P(rb_class_path_cached(val))) {
++	    rb_name_class(val, id);
++	    if (rb_class_path_cached(klass)) {
++		rb_class_name(val);
++	    }
++	}
+     }
+ }
+ 
+@@ -2660,7 +2665,8 @@ const_tbl_update(struct autoload_const_set_args *args)
+ 	}
+ 	rb_clear_constant_cache();
+ 	setup_const_entry(ce, klass, val, visibility);
+-    } else {
++    }
++    else {
+ 	rb_clear_constant_cache();
+ 
+ 	ce = ZALLOC(rb_const_entry_t);
