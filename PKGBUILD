@@ -21,7 +21,7 @@ sha1sums=('038804bbd0e77508dd2510b729a9f3b325489b2e'
 build() {
   cd ruby-${pkgver}
 
-  git apply < ${srcdir}/patch_variable
+  patch -p1 < ${srcdir}/patch_variable
 
   PKG_CONFIG=/usr/bin/pkg-config ./configure \
     --prefix=/usr \
