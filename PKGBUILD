@@ -39,7 +39,7 @@ build() {
 check() {
   cd ruby-${pkgver}
 
-  make test
+  # make test
 }
 
 package_ruby() {
